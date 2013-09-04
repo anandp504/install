@@ -1,0 +1,1318 @@
+<?xml version="1.0"?>
+<project name="tumri" default="help" basedir=".">
+
+    <property name="top.src.dir" value="."/>
+    <loadproperties srcFile="${top.src.dir}/build.properties"/>
+    
+    <!-- ****************************************************************** -->
+
+    <!-- internal use target to perform various initializations -->
+    <target name="deploy-init"
+            depends="">
+    </target>
+
+    <!-- ****************************************************************** -->
+    
+    <target name="help"
+            depends=""
+            description="Provide help information.">
+        <exec executable="ant">
+            <arg line="-p -f ${top.src.dir}/build.xml"/>            
+        </exec>
+    </target>   
+
+    <!-- ****************************************************************** -->
+
+    <target name="deploy-ics"
+            depends=""
+            description="Install iCornerStore and supporting software.">
+        <property name="install.component" value="ics"/>
+        <loadproperties srcFile="${top.src.dir}/${ics.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+        
+        <!-- Install Tomcat component. -->  
+        <ant antfile="${top.src.dir}/${latest.tomcat.src.dir}/install.xml" target="install-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+        
+        <!-- Install Tumri iCornerStore component. -->
+        <ant antfile="${top.src.dir}/${ics.src.dir}/install.xml" target="install-ics">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+
+        <!-- Future enhancement: Make ATS and Logger installations separate from iCornerStore. -->
+<!--
+        <ant antfile="${top.src.dir}/${ats.src.dir}/install/install.xml" target="install-ats">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+        
+        <ant antfile="${top.src.dir}/${logger.src.dir}/install/install.xml" target="install-logger">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+-->     
+        <!-- Copy the top-level installation scripts. -->
+        <copy file="${top.src.dir}/build.xml" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+        <copy file="${top.src.dir}/build.properties" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+    </target>
+
+    <!-- ****************************************************************** -->
+
+    <target name="uninstall-ics"
+            depends=""
+            description="Uninstall iCornerStore and supporting software.">      
+        <property name="install.component" value="ics"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <loadproperties srcFile="${install.root.dir}/current/install/${ics.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+
+        <!-- Display a confirmation message -->
+        <input  
+            message="All data will be deleted. Do you wish to continue?"
+            validargs="y,n"
+            addproperty="do.delete"/>
+        <condition property="do.abort">
+            <equals arg1="n" arg2="${do.delete}"/>
+        </condition>
+        <fail if="do.abort">Uninstallation aborted by user.</fail>
+        
+        <!-- Uninstall Tomcat component. -->    
+        <ant antfile="${install.component.dir}/install/${latest.tomcat.src.dir}/install.xml" target="uninstall-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+        
+        <!-- Uninstall Tumri iCornerStore component. -->        
+        <ant antfile="${install.component.dir}/install/${ics.src.dir}/install.xml" target="uninstall-ics">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    </target>   
+
+    <!-- ****************************************************************** -->
+
+    <target name="deploy-lls"
+            depends=""
+            description="Install LLS and supporting software.">
+        <property name="install.component" value="lls"/>
+        <loadproperties srcFile="${top.src.dir}/${lls.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+        
+        <!-- Install Tomcat component. -->  
+        <ant antfile="${top.src.dir}/${tomcat.src.dir}/install.xml" target="install-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+        
+        <!-- Install Tumri LLS component. -->
+        <ant antfile="${top.src.dir}/${lls.src.dir}/install.xml" target="install-lls">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    
+        <!-- Copy the top-level installation scripts. -->
+        <copy file="${top.src.dir}/build.xml" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+        <copy file="${top.src.dir}/build.properties" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+    </target>
+
+    <!-- ****************************************************************** -->
+
+    <target name="uninstall-lls"
+            depends=""
+            description="Uninstall LLS and supporting software.">       
+        <property name="install.component" value="lls"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <loadproperties srcFile="${install.root.dir}/current/install/${lls.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+
+        <!-- Display a confirmation message -->
+        <input  
+            message="All data will be deleted. Do you wish to continue?"
+            validargs="y,n"
+            addproperty="do.delete"/>
+        <condition property="do.abort">
+            <equals arg1="n" arg2="${do.delete}"/>
+        </condition>
+        <fail if="do.abort">Uninstallation aborted by user.</fail>
+        
+        <!-- Uninstall Tomcat component. -->    
+        <ant antfile="${install.component.dir}/install/${tomcat.src.dir}/install.xml" target="uninstall-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+        
+        <!-- Uninstall Tumri LLS component. -->     
+        <ant antfile="${install.component.dir}/install/${lls.src.dir}/install.xml" target="uninstall-lls">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    </target>   
+    
+    <!-- ****************************************************************** -->
+
+    <target name="deploy-pxl"
+            depends=""
+            description="Install PXL and supporting software.">
+        <property name="install.component" value="pxl"/>
+        <loadproperties srcFile="${top.src.dir}/${pxl.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+
+        <!-- Install Tomcat component. -->
+        <ant antfile="${top.src.dir}/${tomcat.src.dir}/install.xml" target="install-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+
+        <!-- Install Tumri PXL component. -->
+        <ant antfile="${top.src.dir}/${pxl.src.dir}/install.xml" target="install-pxl">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+
+        <!-- Copy the top-level installation scripts. -->
+        <copy file="${top.src.dir}/build.xml" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+        <copy file="${top.src.dir}/build.properties" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+    </target>
+
+    <!-- ****************************************************************** -->
+
+    <target name="uninstall-pxl"
+            depends=""
+            description="Uninstall PXL and supporting software.">
+        <property name="install.component" value="pxl"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <loadproperties srcFile="${install.root.dir}/current/install/${pxl.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+
+        <!-- Display a confirmation message -->
+        <input
+            message="All data will be deleted. Do you wish to continue?"
+            validargs="y,n"
+            addproperty="do.delete"/>
+        <condition property="do.abort">
+            <equals arg1="n" arg2="${do.delete}"/>
+        </condition>
+        <fail if="do.abort">Uninstallation aborted by user.</fail>
+
+        <!-- Uninstall Tomcat component. -->
+        <ant antfile="${install.component.dir}/install/${tomcat.src.dir}/install.xml" target="uninstall-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+
+        <!-- Uninstall Tumri PXL component. -->
+        <ant antfile="${install.component.dir}/install/${pxl.src.dir}/install.xml" target="uninstall-pxl">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    </target>
+
+    <!-- ****************************************************************** -->
+
+    <target name="deploy-joz"
+            depends=""
+            description="Install Joz and supporting software.">
+        <property name="install.component" value="joz"/>
+        <loadproperties srcFile="${top.src.dir}/${joz.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+        
+        <!-- Install Tomcat component. -->  
+        <ant antfile="${top.src.dir}/${tomcat.src.dir}/install.xml" target="install-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+        
+        <!-- Install Tumri Joz component. -->
+        <ant antfile="${top.src.dir}/${joz.src.dir}/install.xml" target="install-joz">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    
+        <!-- Copy the top-level installation scripts. -->
+        <copy file="${top.src.dir}/build.xml" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+        <copy file="${top.src.dir}/build.properties" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+    </target>
+
+    <!-- ****************************************************************** -->
+
+    <target name="uninstall-joz"
+            depends=""
+            description="Uninstall Joz and supporting software.">       
+        <property name="install.component" value="joz"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <loadproperties srcFile="${install.root.dir}/current/install/${joz.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+
+        <!-- Display a confirmation message -->
+        <input  
+            message="All data will be deleted. Do you wish to continue?"
+            validargs="y,n"
+            addproperty="do.delete"/>
+        <condition property="do.abort">
+            <equals arg1="n" arg2="${do.delete}"/>
+        </condition>
+        <fail if="do.abort">Uninstallation aborted by user.</fail>
+        
+        <!-- Uninstall Tomcat component. -->    
+        <ant antfile="${install.component.dir}/install/${tomcat.src.dir}/install.xml" target="uninstall-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+        
+        <!-- Uninstall Tumri Joz component. -->     
+        <ant antfile="${install.component.dir}/install/${joz.src.dir}/install.xml" target="uninstall-joz">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    </target>   
+    
+    <!-- ****************************************************************** -->
+
+    <target name="deploy-qac"
+            depends=""
+            description="Install QAC and supporting software.">
+        <property name="install.component" value="qac"/>
+        <loadproperties srcFile="${top.src.dir}/${qac.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+        
+        <!-- Install Tomcat component. -->  
+        <ant antfile="${top.src.dir}/${tomcat.src.dir}/install.xml" target="install-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+        
+        <!-- Install Tumri QAC component. -->
+        <ant antfile="${top.src.dir}/${qac.src.dir}/install.xml" target="install-qac">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    
+        <!-- Copy the top-level installation scripts. -->
+        <copy file="${top.src.dir}/build.xml" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+        <copy file="${top.src.dir}/build.properties" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+    </target>
+
+    <!-- ****************************************************************** -->
+
+    <target name="uninstall-qac"
+            depends=""
+            description="Uninstall QAC and supporting software.">       
+        <property name="install.component" value="qac"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <loadproperties srcFile="${install.root.dir}/current/install/${qac.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+
+        <!-- Display a confirmation message -->
+        <input  
+            message="Do you wish to uninstall QAC?"
+            validargs="y,n"
+            addproperty="do.delete"/>
+        <condition property="do.abort">
+            <equals arg1="n" arg2="${do.delete}"/>
+        </condition>
+        <fail if="do.abort">Uninstallation aborted by user.</fail>
+        
+        <!-- Uninstall Tomcat component. -->    
+        <ant antfile="${install.component.dir}/install/${tomcat.src.dir}/install.xml" target="uninstall-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+        
+        <!-- Uninstall Tumri QAC component. -->     
+        <ant antfile="${install.component.dir}/install/${qac.src.dir}/install.xml" target="uninstall-qac">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    </target>   
+    
+    <!-- ****************************************************************** -->
+
+    <target name="deploy-tmc"
+            depends=""
+            description="Install TMC and supporting software.">
+        <property name="install.component" value="tmc"/>
+        <loadproperties srcFile="${top.src.dir}/${tmc.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+        
+        <!-- Install Tomcat component. -->  
+        <ant antfile="${top.src.dir}/${tomcat.src.dir}/install.xml" target="install-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+        
+        <!-- Install Tumri TMC component. -->
+        <ant antfile="${top.src.dir}/${tmc.src.dir}/install.xml" target="install-tmc">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    
+        <!-- Copy the top-level installation scripts. -->
+        <copy file="${top.src.dir}/build.xml" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+        <copy file="${top.src.dir}/build.properties" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+    </target>
+
+    <!-- ****************************************************************** -->
+
+    <target name="uninstall-tmc"
+            depends=""
+            description="Uninstall TMC and supporting software.">       
+        <property name="install.component" value="tmc"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <loadproperties srcFile="${install.root.dir}/current/install/${tmc.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+
+        <!-- Display a confirmation message -->
+        <input  
+            message="Do you wish to uninstall TMC?"
+            validargs="y,n"
+            addproperty="do.delete"/>
+        <condition property="do.abort">
+            <equals arg1="n" arg2="${do.delete}"/>
+        </condition>
+        <fail if="do.abort">Uninstallation aborted by user.</fail>
+        
+        <!-- Uninstall Tomcat component. -->    
+        <ant antfile="${install.component.dir}/install/${tomcat.src.dir}/install.xml" target="uninstall-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+        
+        <!-- Uninstall Tumri TMC component. -->     
+        <ant antfile="${install.component.dir}/install/${tmc.src.dir}/install.xml" target="uninstall-tmc">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    </target>   
+    
+    <!-- ****************************************************************** -->
+
+    <target name="deploy-tcm"
+            depends=""
+            description="Install TCM and supporting software.">
+        <property name="install.component" value="tcm"/>
+        <loadproperties srcFile="${top.src.dir}/${tcm.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+        
+        <!-- Install Tomcat component. -->  
+        <ant antfile="${top.src.dir}/${tomcat.src.dir}/install.xml" target="install-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+        
+        <!-- Install Tumri TCM component. -->
+        <ant antfile="${top.src.dir}/${tcm.src.dir}/install.xml" target="install-tcm">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    
+        <!-- Copy the top-level installation scripts. -->
+        <copy file="${top.src.dir}/build.xml" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+        <copy file="${top.src.dir}/build.properties" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+
+        <!-- Install Terracotta client. -->
+        <loadproperties srcFile="${install.root.dir}/conf/local.properties"/>
+        <condition property="install.terracotta.client">
+            <and>
+                <available file="${top.src.dir}/${terracotta.client.src.dir}"/>
+                <istrue value="${terracotta.client.install.or.update}"/>
+            </and>
+        </condition>
+        <antcall target="install-terracotta-client" />
+    </target>
+
+    <!-- ****************************************************************** -->
+
+    <target name="uninstall-tcm"
+            depends=""
+            description="Uninstall TCM and supporting software.">       
+        <property name="install.component" value="tcm"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <loadproperties srcFile="${install.root.dir}/current/install/${tcm.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+
+        <!-- Display a confirmation message -->
+        <input  
+            message="Do you wish to uninstall TCM?"
+            validargs="y,n"
+            addproperty="do.delete"/>
+        <condition property="do.abort">
+            <equals arg1="n" arg2="${do.delete}"/>
+        </condition>
+        <fail if="do.abort">Uninstallation aborted by user.</fail>
+
+        <!-- Uninstall Terracotta server -->
+        <!--<ant antfile="${install.component.dir}/install/${terracotta.client.src.dir}/install.xml" target="uninstall-terracotta-client">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>-->
+
+        <!-- Uninstall Tomcat component. -->    
+        <ant antfile="${install.component.dir}/install/${tomcat.src.dir}/install.xml" target="uninstall-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+        
+        <!-- Uninstall Tumri TCM component. -->     
+        <ant antfile="${install.component.dir}/install/${tcm.src.dir}/install.xml" target="uninstall-tcm">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    </target>
+
+    <!-- ****************************************************************** -->
+
+    <target name="deploy-lp"
+            depends=""
+            description="Install LP and supporting software.">
+        <property name="install.component" value="lp"/>
+        <loadproperties srcFile="${top.src.dir}/${lp.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+        
+        <!-- Install Tomcat component. -->  
+        <ant antfile="${top.src.dir}/${latest.tomcat.src.dir}/install.xml" target="install-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+        
+        <!-- Install Tumri LP component. -->
+        <ant antfile="${top.src.dir}/${lp.src.dir}/install.xml" target="install-lp">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    
+        <!-- Copy the top-level installation scripts. -->
+        <copy file="${top.src.dir}/build.xml" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+        <copy file="${top.src.dir}/build.properties" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+    </target>
+
+    <!-- ****************************************************************** -->
+
+    <target name="uninstall-lp"
+            depends=""
+            description="Uninstall LP and supporting software.">        
+        <property name="install.component" value="lp"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <loadproperties srcFile="${install.root.dir}/current/install/${lp.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+
+        <!-- Display a confirmation message -->
+        <input  
+            message="Do you wish to uninstall LP?"
+            validargs="y,n"
+            addproperty="do.delete"/>
+        <condition property="do.abort">
+            <equals arg1="n" arg2="${do.delete}"/>
+        </condition>
+        <fail if="do.abort">Uninstallation aborted by user.</fail>
+        
+        <!-- Uninstall Tomcat component. -->    
+        <ant antfile="${install.component.dir}/install/${latest.tomcat.src.dir}/install.xml" target="uninstall-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+        
+        <!-- Uninstall Tumri LP component. -->      
+        <ant antfile="${install.component.dir}/install/${lp.src.dir}/install.xml" target="uninstall-lp">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    </target>   
+    
+    <!-- ****************************************************************** -->
+
+    <target name="deploy-buildui"
+            depends=""
+            description="Install PXL and supporting software.">
+        <property name="install.component" value="buildui"/>
+        <loadproperties srcFile="${top.src.dir}/${buildui.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+
+        <!-- Install Tomcat component. -->
+        <ant antfile="${top.src.dir}/${tomcat.src.dir}/install.xml" target="install-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+
+        <!-- Install Tumri PXL component. -->
+        <ant antfile="${top.src.dir}/${buildui.src.dir}/install.xml" target="install-buildui">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+
+        <!-- Copy the top-level installation scripts. -->
+        <copy file="${top.src.dir}/build.xml" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+        <copy file="${top.src.dir}/build.properties" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+    </target>
+
+    <!-- ****************************************************************** -->
+
+    <target name="uninstall-buildui"
+            depends=""
+            description="Uninstall PXL and supporting software.">
+        <property name="install.component" value="buildui"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <loadproperties srcFile="${install.root.dir}/current/install/${buildui.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+
+        <!-- Display a confirmation message -->
+        <input
+            message="All data will be deleted. Do you wish to continue?"
+            validargs="y,n"
+            addproperty="do.delete"/>
+        <condition property="do.abort">
+            <equals arg1="n" arg2="${do.delete}"/>
+        </condition>
+        <fail if="do.abort">Uninstallation aborted by user.</fail>
+
+        <!-- Uninstall Tomcat component. -->
+        <ant antfile="${install.component.dir}/install/${tomcat.src.dir}/install.xml" target="uninstall-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+
+        <!-- Uninstall Tumri PXL component. -->
+        <ant antfile="${install.component.dir}/install/${buildui.src.dir}/install.xml" target="uninstall-buildui">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    </target>
+
+    <!-- ****************************************************************** -->
+
+    <target name="deploy-wac"
+            depends=""
+            description="Install WAC and supporting software.">
+        <property name="install.component" value="wac"/>
+        <loadproperties srcFile="${top.src.dir}/${wac.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+        
+        <!-- Install Tomcat component. -->  
+        <ant antfile="${top.src.dir}/${tomcat.src.dir}/install.xml" target="install-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+        
+        <!-- Install  WAC component. -->
+        <ant antfile="${top.src.dir}/${wac.src.dir}/install.xml" target="install-wac">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    
+        <!-- Copy the top-level installation scripts. -->
+        <copy file="${top.src.dir}/build.xml" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+        <copy file="${top.src.dir}/build.properties" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+    </target>
+
+    <!-- ****************************************************************** -->
+
+    <target name="uninstall-wac"
+            depends=""
+            description="Uninstall WAC and supporting software.">       
+        <property name="install.component" value="wac"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <loadproperties srcFile="${install.root.dir}/current/install/${wac.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+
+        <!-- Display a confirmation message -->
+        <input  
+            message="All data will be deleted. Do you wish to continue?"
+            validargs="y,n"
+            addproperty="do.delete"/>
+        <condition property="do.abort">
+            <equals arg1="n" arg2="${do.delete}"/>
+        </condition>
+        <fail if="do.abort">Uninstallation aborted by user.</fail>
+        
+        <!-- Uninstall Tomcat component. -->    
+        <ant antfile="${install.component.dir}/install/${tomcat.src.dir}/install.xml" target="uninstall-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+        
+        <!-- Uninstall Tumri WAC component. -->     
+        <ant antfile="${install.component.dir}/install/${wac.src.dir}/install.xml" target="uninstall-wac">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    </target>   
+
+    <!-- ****************************************************************** -->
+    
+    <!-- ****************************************************************** -->
+
+    <target name="deploy-ta"
+            depends=""
+            description="Install ta and supporting software.">
+        <property name="install.component" value="ta"/>
+        <loadproperties srcFile="${top.src.dir}/${ta.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+
+        <!-- Install Tomcat component. -->
+        <ant antfile="${top.src.dir}/${tomcat.src.dir}/install.xml" target="install-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+
+        <!-- Install Tumri ta component. -->
+        <ant antfile="${top.src.dir}/${ta.src.dir}/install.xml" target="install-ta">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+
+        <!-- Copy the top-level installation scripts. -->
+        <copy file="${top.src.dir}/build.xml" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+        <copy file="${top.src.dir}/build.properties" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+    </target>
+    <!-- ****************************************************************** -->
+
+    <target name="deploy-lca"
+            depends=""
+            description="Install lca and supporting software.">
+        <property name="install.component" value="lca"/>
+        <loadproperties srcFile="${top.src.dir}/${lca.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+
+        <!-- Install Tomcat component. -->
+        <ant antfile="${top.src.dir}/${tomcat.src.dir}/install.xml" target="install-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+
+        <!-- Install Tumri lca component. -->
+        <ant antfile="${top.src.dir}/${lca.src.dir}/install.xml" target="install-lca">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+
+        <!-- Copy the top-level installation scripts. -->
+        <copy file="${top.src.dir}/build.xml" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+        <copy file="${top.src.dir}/build.properties" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+    </target>
+
+    <!-- ****************************************************************** -->
+
+    <target name="uninstall-ta"
+            depends=""
+            description="Uninstall ta and supporting software.">
+        <property name="install.component" value="ta"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <loadproperties srcFile="${install.root.dir}/current/install/${ta.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+
+        <!-- Display a confirmation message -->
+        <input
+            message="Do you wish to uninstall ta?"
+            validargs="y,n"
+            addproperty="do.delete"/>
+        <condition property="do.abort">
+            <equals arg1="n" arg2="${do.delete}"/>
+        </condition>
+        <fail if="do.abort">Uninstallation aborted by user.</fail>
+
+        <!-- Uninstall Tomcat component. -->
+        <ant antfile="${install.component.dir}/install/${tomcat.src.dir}/install.xml" target="uninstall-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+
+        <!-- Uninstall Tumri ta component. -->
+        <ant antfile="${install.component.dir}/install/${ta.src.dir}/install.xml" target="uninstall-ta">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    </target>   
+
+    <!-- ****************************************************************** -->
+
+    <target name="deploy-trs"
+            depends=""
+            description="Install TA Reports and supporting software.">
+        <property name="install.component" value="trs"/>
+        <loadproperties srcFile="${top.src.dir}/${trs.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+        
+        <!-- Install Tomcat component. -->  
+         <ant antfile="${top.src.dir}/${latest.tomcat.src.dir}/install.xml" target="install-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+        
+        <!-- Install Tumri trs component. -->
+        <ant antfile="${top.src.dir}/${trs.src.dir}/install.xml" target="install-trs">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    
+        <!-- Copy the top-level installation scripts. -->
+        <copy file="${top.src.dir}/build.xml" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+        <copy file="${top.src.dir}/build.properties" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+    </target>
+
+    <!-- ****************************************************************** -->
+
+    <target name="uninstall-trs"
+            depends=""
+            description="Uninstall TRS/TDI and supporting software.">       
+        <property name="install.component" value="trs"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <loadproperties srcFile="${install.root.dir}/current/install/${trs.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+
+        <!-- Display a confirmation message -->
+        <input  
+            message="Do you wish to uninstall TA Reports?"
+            validargs="y,n"
+            addproperty="do.delete"/>
+        <condition property="do.abort">
+            <equals arg1="n" arg2="${do.delete}"/>
+        </condition>
+        <fail if="do.abort">Uninstallation aborted by user.</fail>
+        
+        <!-- Uninstall Tomcat component. -->    
+        <ant antfile="${install.component.dir}/install/${tomcat.src.dir}/install.xml" target="uninstall-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+        
+        <!-- Uninstall Tumri TRS component. -->     
+        <ant antfile="${install.component.dir}/install/${trs.src.dir}/install.xml" target="uninstall-trs">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    </target>
+
+    <!-- ****************************************************************** -->
+
+    <target name="deploy-cbo"
+            depends=""
+            description="Install Collective Bid Optimizer and supporting software.">
+        <property name="install.component" value="cbo"/>
+        <loadproperties srcFile="${top.src.dir}/${cbo.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+        
+        <!-- Install Tomcat component. -->  
+        <!--  <ant antfile="${top.src.dir}/${tomcat.src.dir}/install.xml" target="install-tomcat"> -->
+        <ant antfile="${top.src.dir}/${latest.tomcat.src.dir}/install.xml" target="install-tomcat"> 
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+        
+        <!-- Install Tumri cbo component. -->
+        <ant antfile="${top.src.dir}/${cbo.src.dir}/install.xml" target="install-cbo">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    
+        <!-- Copy the top-level installation scripts. -->
+        <copy file="${top.src.dir}/build.xml" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+        <copy file="${top.src.dir}/build.properties" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+    </target>
+
+    <!-- ****************************************************************** -->
+
+    <target name="uninstall-cbo"
+            depends=""
+            description="Uninstall Collective Bid Optimizer and supporting software.">       
+        <property name="install.component" value="cbo"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <loadproperties srcFile="${install.root.dir}/current/install/${cbo.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+
+        <!-- Display a confirmation message -->
+        <input  
+            message="Do you wish to uninstall CBO?"
+            validargs="y,n"
+            addproperty="do.delete"/>
+        <condition property="do.abort">
+            <equals arg1="n" arg2="${do.delete}"/>
+        </condition>
+        <fail if="do.abort">Uninstallation aborted by user.</fail>
+        
+        <!-- Uninstall Tomcat component. -->    
+        <!--  <ant antfile="${install.component.dir}/install/${tomcat.src.dir}/install.xml" target="uninstall-tomcat"> -->
+        <ant antfile="${install.component.dir}/install/${latest.tomcat.src.dir}/install.xml" target="uninstall-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+        
+        <!-- Uninstall CBO component. -->     
+        <ant antfile="${install.component.dir}/install/${cbo.src.dir}/install.xml" target="uninstall-cbo">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    </target>
+
+    <!-- ****************************************************************** -->
+
+    <target name="deploy-cof"
+            depends=""
+            description="Install COF and supporting software.">
+        <property name="install.component" value="cof"/>
+        <loadproperties srcFile="${top.src.dir}/${cof.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+
+        <!-- Install Tomcat component. -->
+        <ant antfile="${top.src.dir}/${tomcat.src.dir}/install.xml" target="install-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+
+        <!-- Install Tumri cof component. -->
+        <ant antfile="${top.src.dir}/${cof.src.dir}/install.xml" target="install-cof">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+
+        <!-- Copy the top-level installation scripts. -->
+        <copy file="${top.src.dir}/build.xml" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+        <copy file="${top.src.dir}/build.properties" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+    </target>
+
+    <!-- ****************************************************************** -->
+
+    <target name="uninstall-cof"
+            depends=""
+            description="Uninstall COF supporting software.">
+        <property name="install.component" value="cof"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <loadproperties srcFile="${install.root.dir}/current/install/${cof.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+
+        <!-- Display a confirmation message -->
+        <input
+            message="Do you wish to uninstall COF?"
+            validargs="y,n"
+            addproperty="do.delete"/>
+        <condition property="do.abort">
+            <equals arg1="n" arg2="${do.delete}"/>
+        </condition>
+        <fail if="do.abort">Uninstallation aborted by user.</fail>
+
+        <!-- Uninstall Tomcat component. -->
+        <ant antfile="${install.component.dir}/install/${tomcat.src.dir}/install.xml" target="uninstall-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+
+        <!-- Uninstall Tumri TRS component. -->
+        <ant antfile="${install.component.dir}/install/${cof.src.dir}/install.xml" target="uninstall-cof">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    </target>
+
+    <!-- ****************************************************************** -->
+    <target name="deploy-adp"
+            depends=""
+            description="Install Tumri Adpodium">
+        <property name="install.component" value="adp"/>
+        <loadproperties srcFile="${top.src.dir}/${adp.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+        
+        <!-- Install Tomcat component. -->  
+        <ant antfile="${top.src.dir}/${tomcat.src.dir}/install.xml" target="install-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+        
+        <!-- Install Tumri adp component. -->
+        <ant antfile="${top.src.dir}/${adp.src.dir}/install.xml" target="install-adp">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    
+        <!-- Copy the top-level installation scripts. -->
+        <copy file="${top.src.dir}/build.xml" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+        <copy file="${top.src.dir}/build.properties" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+    </target>
+    
+   <!-- ****************************************************************** -->
+    <target name="uninstall-adp"
+            depends=""
+            description="Uninstall  Tumri AdPodium.">
+        <property name="install.component" value="adp"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <loadproperties srcFile="${install.root.dir}/current/install/${adp.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+
+        <!-- Display a confirmation message -->
+        <input
+            message="Do you wish to uninstall Adpodium?"
+            validargs="y,n"
+            addproperty="do.delete"/>
+        <condition property="do.abort">
+            <equals arg1="n" arg2="${do.delete}"/>
+        </condition>
+        <fail if="do.abort">Uninstallation aborted by user.</fail>
+
+        <!-- Uninstall Tomcat component. -->
+        <ant antfile="${install.component.dir}/install/${tomcat.src.dir}/install.xml" target="uninstall-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+
+        <!-- Uninstall Tumri ADP component. -->
+        <ant antfile="${install.component.dir}/install/${adp.src.dir}/install.xml" target="uninstall-adp">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    </target>
+
+    <!-- ****************************************************************** -->
+	
+    <target name="deploy-tc"
+            depends=""
+            description="Install Tumri Campaigner">
+        <property name="install.component" value="tc"/>
+        <loadproperties srcFile="${top.src.dir}/${tc.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+        
+        <!-- Install Tomcat component. -->  
+        <ant antfile="${top.src.dir}/${latest.tomcat.src.dir}/install.xml" target="install-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+        
+        <!-- Install Tumri Campaigner component. -->
+        <ant antfile="${top.src.dir}/${tc.src.dir}/install.xml" target="install-tc">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    
+        <!-- Copy the top-level installation scripts. -->
+        <copy file="${top.src.dir}/build.xml" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+        <copy file="${top.src.dir}/build.properties" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+
+        <!-- Install Terracotta client. -->
+        <loadproperties srcFile="${install.root.dir}/conf/local.properties"/>
+        <condition property="install.terracotta.client">
+            <and>
+                <available file="${top.src.dir}/${terracotta.client.src.dir}"/>
+                <istrue value="${terracotta.client.install.or.update}"/>
+            </and>
+        </condition>
+
+        <antcall target="install-terracotta-client" />
+    </target>
+    
+   <!-- ****************************************************************** -->
+    <target name="uninstall-tc"
+            depends=""
+            description="Uninstall  Tumri Campaigner.">
+        <property name="install.component" value="tc"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <loadproperties srcFile="${install.root.dir}/current/install/${tc.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+
+        <!-- Display a confirmation message -->
+        <input
+            message="Do you wish to uninstall Tumri Campaigner?"
+            validargs="y,n"
+            addproperty="do.delete"/>
+        <condition property="do.abort">
+            <equals arg1="n" arg2="${do.delete}"/>
+        </condition>
+        <fail if="do.abort">Uninstallation aborted by user.</fail>
+
+        <!-- Uninstall Tumri TC component. -->
+        <ant antfile="${install.component.dir}/install/${tc.src.dir}/install.xml" target="uninstall-tc">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+
+        <!-- Uninstall Tomcat component. No Need to delete Tomcat component as the above command does that -->
+        <!--
+        <ant antfile="${install.component.dir}/install/${tomcat.src.dir}/install.xml" target="uninstall-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+        -->
+
+    </target>
+    
+    
+     <!-- ****************************************************************** -->
+    	
+        <target name="deploy-igs"
+                depends=""
+                description="Install Image Generation Server">
+            <property name="install.component" value="igs"/>
+            <loadproperties srcFile="${top.src.dir}/${igs.src.dir}/install.properties"/>
+            <property name="install.component.version" value="${component.version}"/>
+            <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+            <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+            
+            <!-- Install Tomcat component. -->  
+            <ant antfile="${top.src.dir}/${tomcat.src.dir}/install.xml" target="install-tomcat">
+                <property name="install.component.dir" value="${install.component.dir}"/>
+            </ant>
+            
+            <!-- Install Image Generation Server component. -->
+            <ant antfile="${top.src.dir}/${igs.src.dir}/install.xml" target="install-igs">
+                <property name="install.root.dir" value="${install.root.dir}"/>
+                <property name="install.component.dir" value="${install.component.dir}"/>
+            </ant>
+        
+            <!-- Copy the top-level installation scripts. -->
+            <copy file="${top.src.dir}/build.xml" overwrite="yes" preservelastmodified="true"
+                    todir="${install.component.dir}/install"/>
+            <copy file="${top.src.dir}/build.properties" overwrite="yes" preservelastmodified="true"
+                    todir="${install.component.dir}/install"/>
+        </target>
+        
+       <!-- ****************************************************************** -->
+        <target name="uninstall-igs"
+                depends=""
+                description="Uninstall  Image Generation Server.">
+            <property name="install.component" value="igs"/>
+            <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+            <loadproperties srcFile="${install.root.dir}/current/install/${igs.src.dir}/install.properties"/>
+            <property name="install.component.version" value="${component.version}"/>
+            <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+    
+            <!-- Display a confirmation message -->
+            <input
+                message="Do you wish to uninstall Image Generation Server?"
+                validargs="y,n"
+                addproperty="do.delete"/>
+            <condition property="do.abort">
+                <equals arg1="n" arg2="${do.delete}"/>
+            </condition>
+            <fail if="do.abort">Uninstallation aborted by user.</fail>
+    
+            <!-- Uninstall Tomcat component. -->
+            <ant antfile="${install.component.dir}/install/${tomcat.src.dir}/install.xml" target="uninstall-tomcat">
+                <property name="install.component.dir" value="${install.component.dir}"/>
+            </ant>
+    
+    	</target>
+
+    <!-- ****************************************************************** -->
+
+        <target name="deploy-terracotta-server"
+                depends=""
+                description="Install Terracotta Server.">
+            <property name="install.component" value="terracotta-server"/>
+            <property name="install.src.dir" value="${basedir}"/>
+            <loadproperties srcFile="${install.src.dir}/install.properties"/>
+            <property name="install.component.version" value="${component.version}"/>
+            <property name="install.root.dir" value="${terracotta.server.base.path}"/>
+            <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+
+            <!-- Install Terracotta server. -->
+            <ant antfile="${top.src.dir}/install.xml" target="install-terracotta-server" />
+        </target>
+
+        <!-- ****************************************************************** -->
+
+        <target name="uninstall-terracotta-server"
+                depends=""
+                description="Uninstall Terracotta server.">
+            <property name="install.component" value="terracotta-server"/>
+            <loadproperties srcFile="${top.src.dir}/install.properties"/>
+            <property name="install.component.version" value="${terracotta.server.version}"/>
+            <property name="install.root.dir" value="${terracotta.server.base.path}"/>
+            <property name="install.component.dir" value="${install.root.dir}/${terracotta.server.dir.name}"/>
+
+            <!-- Display a confirmation message -->
+            <input
+                message="Do you wish to uninstall Terracotta Server?"
+                validargs="y,n"
+                addproperty="do.delete"/>
+            <condition property="do.abort">
+                <equals arg1="n" arg2="${do.delete}"/>
+            </condition>
+            <fail if="do.abort">Uninstallation aborted by user.</fail>
+
+            <!-- Uninstall Terracotta server -->
+            <ant antfile="${install.component.dir}/install/${terracotta.server.src.dir}/install.xml" target="uninstall-terracotta-server">
+                <property name="install.component.dir" value="${install.component.dir}"/>
+            </ant>
+
+        </target>
+
+        <!-- ****************************************************************** -->
+
+    <!-- ****************************************************************** -->
+
+    <target name="deploy-tca"
+            depends=""
+            description="Install TCA and supporting software.">
+        <property name="install.component" value="tca"/>
+        <loadproperties srcFile="${top.src.dir}/${tca.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+
+        <!-- Install Tomcat component. -->
+        <ant antfile="${top.src.dir}/${tomcat.src.dir}/install.xml" target="install-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+
+        <!-- Install  WAC component. -->
+        <ant antfile="${top.src.dir}/${tca.src.dir}/install.xml" target="install-tca">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+
+        <!-- Copy the top-level installation scripts. -->
+        <copy file="${top.src.dir}/build.xml" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+        <copy file="${top.src.dir}/build.properties" overwrite="yes" preservelastmodified="true"
+                todir="${install.component.dir}/install"/>
+    </target>
+
+    <!-- ****************************************************************** -->
+
+    <target name="uninstall-tca"
+            depends=""
+            description="Uninstall TCA and supporting software.">       
+        <property name="install.component" value="tca"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <loadproperties srcFile="${install.root.dir}/current/install/${tca.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+
+        <!-- Display a confirmation message -->
+        <input
+            message="All data will be deleted. Do you wish to continue?"
+            validargs="y,n"
+            addproperty="do.delete"/>
+        <condition property="do.abort">
+            <equals arg1="n" arg2="${do.delete}"/>
+        </condition>
+        <fail if="do.abort">Uninstallation aborted by user.</fail>
+
+        <!-- Uninstall Tomcat component. -->
+        <ant antfile="${install.component.dir}/install/${tomcat.src.dir}/install.xml" target="uninstall-tomcat">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+
+        <!-- Uninstall Tumri TCA component. -->
+        <ant antfile="${install.component.dir}/install/${tca.src.dir}/install.xml" target="uninstall-tca">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    </target>
+
+    <!-- ****************************************************************** -->
+
+    <!-- Install terracotta client if required -->
+    <target name="install-terracotta-client" if="install.terracotta.client">
+        <ant antfile="${top.src.dir}/${terracotta.client.src.dir}/install.xml"
+                     target="install-terracotta-client"/>
+    </target>
+
+    <!-- ****************************************************************** -->
+
+    <target name="deploy-pdlp"
+            depends=""
+            description="Install PDLP.">
+        <property name="install.component" value="pdlp"/>
+        <loadproperties srcFile="${top.src.dir}/${pdlp.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+
+        <!-- Install Akka server. -->
+        <ant antfile="${top.src.dir}/${akka.server.src.dir}/install.xml" target="install-akka-server">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+
+        <!-- Install PDLP component. -->
+        <ant antfile="${top.src.dir}/${pdlp.src.dir}/install.xml" target="install-pdlp">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    </target>
+
+    <!-- ****************************************************************** -->
+
+    <target name="uninstall-pdlp"
+            depends=""
+            description="Uninstall PDLP.">
+        <property name="install.component" value="pdlp"/>
+        <property name="install.root.dir" value="${tumri.home.dir}/${install.component}"/>
+        <loadproperties srcFile="${install.root.dir}/current/install/${pdlp.src.dir}/install.properties"/>
+        <property name="install.component.version" value="${component.version}"/>
+        <property name="install.component.dir" value="${install.root.dir}/${install.component}-${install.component.version}"/>
+
+        <!-- Display a confirmation message -->
+        <input
+                message="Do you wish to uninstall PDLP?"
+                validargs="y,n"
+                addproperty="do.delete"/>
+        <condition property="do.abort">
+            <equals arg1="n" arg2="${do.delete}"/>
+        </condition>
+        <fail if="do.abort">Uninstallation aborted by user.</fail>
+
+
+        <!-- Uninstall Tomcat component. -->
+        <ant antfile="${install.component.dir}/install/${akka.server.src.dir}/install.xml" target="uninstall-akka-server">
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+
+        <!-- Uninstall PDLP -->
+        <ant antfile="${install.component.dir}/install/${pdlp.src.dir}/install.xml" target="uninstall-pdlp">
+            <property name="install.root.dir" value="${install.root.dir}"/>
+            <property name="install.component.dir" value="${install.component.dir}"/>
+        </ant>
+    </target>
+
+    <!-- ****************************************************************** -->
+
+</project>
